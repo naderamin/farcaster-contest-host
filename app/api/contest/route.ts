@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
+import { Redis } from '@upstash/redis';
 
-import { kv } from '@vercel/kv';
-
+const redis = Redis.fromEnv();
 const KEY_PREFIX = 'contest:';
+
 async function getContest(id: string): Promise<Contest | null> {
-  const c = await kv.get<Contest>(`${KEY_PREFIX}${id}`);
+  const c = await redis.get<Contest>(`${KEY_PREFIX}${id}`);
   return c || null;
 }
+
 async function setContest(id: string, contest: Contest) {
-  await kv.set(`${KEY_PREFIX}${id}`, contest);
+  await redis.set(`${KEY_PREFIX}${id}`, contest);
 }
 
 export type Contest = {
