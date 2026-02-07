@@ -1,7 +1,22 @@
 import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 
-const redis = Redis.fromEnv();
+function env(name: string): string | undefined {
+  const v = process.env[name];
+  return v && v.trim() ? v.trim() : undefined;
+}
+
+// Support multiple env var naming schemes.
+// Preferred: set REDIS_REST_URL + REDIS_REST_TOKEN in Vercel env.
+const redisUrl = env('REDIS_REST_URL') || env('UPSTASH_REDIS_REST_URL') || env('KV_REST_API_URL');
+const redisToken = env('REDIS_REST_TOKEN') || env('UPSTASH_REDIS_REST_TOKEN') || env('KV_REST_API_TOKEN');
+
+if (!redisUrl || !redisToken) {
+  // Throwing makes misconfig obvious in logs and avoids silent "Not found".
+  throw new Error('Missing Redis env vars. Set REDIS_REST_URL and REDIS_REST_TOKEN (or UPSTASH_REDIS_REST_URL/TOKEN).');
+}
+
+const redis = new Redis({ url: redisUrl, token: redisToken });
 const KEY_PREFIX = 'contest:';
 
 async function getContest(id: string): Promise<Contest | null> {

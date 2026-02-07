@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Farcaster Contest Host (MVP)
 
-## Getting Started
+Create a contest, ask people to reply to your cast, and show a leaderboard ranked by **likes + 2×recasts**.
 
-First, run the development server:
+## Env vars (Vercel)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Required:
+- `NEYNAR_API_KEY`
+- `NEXT_PUBLIC_APP_URL` (e.g. `https://farcaster-contest-host.vercel.app`)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Persistence (Redis):
+- Preferred: set these manually (copy from your Upstash integration):
+  - `REDIS_REST_URL`
+  - `REDIS_REST_TOKEN`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Alternatives supported:
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+- `KV_REST_API_URL` + `KV_REST_API_TOKEN`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Usage
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1) Open `/create` and create a contest.
+2) Post the generated cast text from your Farcaster account.
+3) Paste the cast hash at `/c/<id>/set-hash`.
+4) Share `/c/<id>` as the leaderboard.
