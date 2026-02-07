@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 
-// Minimal in-memory store (MVP). For production, move to KV/DB.
-// contestId -> contest data
-type ContestStore = Map<string, Contest>;
-const g = globalThis as unknown as { __contests?: ContestStore };
-const contests: ContestStore = g.__contests || new Map();
-g.__contests = contests;
+import { kv } from '@vercel/kv';
+
+const KEY_PREFIX = 'contest:';
+async function getContest(id: string): Promise<Contest | null> {
+  const c = await kv.get<Contest>(`${KEY_PREFIX}${id}`);
+  return c || null;
+}
+async function setContest(id: string, contest: Contest) {
+  await kv.set(`${KEY_PREFIX}${id}`, contest);
+}
 
 export type Contest = {
   id: string;
@@ -32,7 +36,7 @@ export async function POST(req: Request) {
     endsAt: new Date(endsAt).toISOString(),
     scoring: scoring || 'likes_plus_2recasts',
   };
-  contests.set(id, contest);
+  await setContest(id, contest);
   return NextResponse.json({ contest });
 }
 
@@ -40,7 +44,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-  const c = contests.get(id);
+  const c = await getContest(id);
   if (!c) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ contest: c });
 }
@@ -49,7 +53,7 @@ export async function PATCH(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-  const c: Contest | undefined = contests.get(id);
+  const c = await getContest(id);
   if (!c) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const body = await req.json();
@@ -59,6 +63,6 @@ export async function PATCH(req: Request) {
   }
 
   const updated: Contest = { ...c, castHash };
-  contests.set(id, updated);
+  await setContest(id, updated);
   return NextResponse.json({ contest: updated });
 }
