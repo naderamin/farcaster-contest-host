@@ -23,7 +23,7 @@ export default async function ContestPage({ params }: { params: { id: string } }
   if (!contest) {
     err = 'Contest not found';
   } else if (!contest.castHash) {
-    err = 'Contest castHash not set yet. Post the cast, then set castHash in the contest store (MVP limitation).';
+    err = `Contest castHash not set yet. After posting the cast, set it here: ${baseUrl}/c/${id}/set-hash`;
   } else if (!apiKey) {
     err = 'Server missing NEYNAR_API_KEY.';
   } else {

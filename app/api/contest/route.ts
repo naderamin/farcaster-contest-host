@@ -44,3 +44,21 @@ export async function GET(req: Request) {
   if (!c) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ contest: c });
 }
+
+export async function PATCH(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  const c: Contest | undefined = contests.get(id);
+  if (!c) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const body = await req.json();
+  const castHash = body?.castHash ? String(body.castHash) : '';
+  if (!castHash || !castHash.startsWith('0x') || castHash.length < 10) {
+    return NextResponse.json({ error: 'Invalid castHash' }, { status: 400 });
+  }
+
+  const updated: Contest = { ...c, castHash };
+  contests.set(id, updated);
+  return NextResponse.json({ contest: updated });
+}
